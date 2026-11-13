@@ -517,20 +517,21 @@
 
 <script>
   (function(){
-    var h = location.hash.replace(/^#/, ''), p = h.split('~');
     function d(x){
       try { return decodeURIComponent((x || '').replace(/\+/g, ' ')); }
       catch (e) { return x || ''; }
     }
-    if (h) {
-      var titulo = d(p[0]);
-      var album = d(p[1]);
-      var artista = d(p[2]);
-      document.getElementById('a').textContent = titulo || 'Sem dados';
+    function render(){
+      var h = location.hash.replace(/^#/, ''), p = h.split('~');
+      var titulo = d(p[0]), album = d(p[1]), artista = d(p[2]);
+      document.getElementById('a').textContent = (h && titulo) ? titulo : 'Sem dados';
       document.getElementById('b').textContent = album;
       document.getElementById('r').textContent = artista;
-      document.getElementById('sep').textContent = (artista && album) ? '•' : '';
+      document.getElementById('sep').textContent = (artista && album) ? '\u2022' : '';
     }
+    render();
+    window.addEventListener('hashchange', render, false);
+    window.addEventListener('pageshow', render, false);
     document.addEventListener('touchmove', function(e){ e.preventDefault(); }, false);
   })();
 </script>
