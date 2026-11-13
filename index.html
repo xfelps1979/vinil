@@ -1,38 +1,538 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Vinil</title>
+<title>Vitrola</title>
 <style>
-html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:-apple-system,Helvetica,Arial,sans-serif}
-#w{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;height:100%;padding:0 4vw;box-sizing:border-box}
-#d{position:relative;width:62vh;height:62vh;min-width:62vh;border-radius:50%}
-#v{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:50%;background:repeating-radial-gradient(circle at center,#0c0c0c 0,#0c0c0c 2px,#1c1c1c 3px,#0c0c0c 4px);box-shadow:0 0 0 2px #222,0 0 40px rgba(255,255,255,.05);-webkit-animation:g 4s linear infinite;animation:g 4s linear infinite}
-#l{position:absolute;left:33%;top:33%;width:34%;height:34%;border-radius:50%;background:#b8472f;box-shadow:inset 0 0 0 3px rgba(0,0,0,.25)}
-#h{position:absolute;left:47.5%;top:47.5%;width:5%;height:5%;border-radius:50%;background:#000}
-#s{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:50%;background:linear-gradient(115deg,rgba(255,255,255,0) 35%,rgba(255,255,255,.09) 50%,rgba(255,255,255,0) 65%)}
-#t{margin-left:6vw;max-width:42vw;color:#ddd}
-#a{font-size:5.2vh;font-weight:600;line-height:1.15;color:#eee}
-#b{margin-top:2vh;font-size:3.2vh;color:#999}
-#r{margin-top:1vh;font-size:2.8vh;color:#666}
-@-webkit-keyframes g{to{-webkit-transform:rotate(360deg)}}
-@keyframes g{to{transform:rotate(360deg)}}
-@media (orientation:portrait){#w{-webkit-flex-direction:column;flex-direction:column}#d{width:70vw;height:70vw;min-width:0}#t{margin:6vh 0 0;max-width:86vw;text-align:center}#a{font-size:4.2vw}#b{font-size:3vw}#r{font-size:2.6vw}}
-</style></head><body>
-<div id="w">
-<div id="d"><div id="v"><div id="l"><div id="h"></div></div></div><div id="s"></div></div>
-<div id="t"><div id="a">Sem dados</div><div id="b"></div><div id="r"></div></div>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #160e08;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    background-color: #21140c;
+  }
+
+  /* Fundo de mesa de madeira escura com nós orgânicos e iluminação de estúdio */
+  .wood-table-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Gabinete minimalista preto fosco da vitrola (estilo Audio-Technica / Pro-Ject moderno) */
+  .turntable-plinth {
+    position: relative;
+    width: 82vmin;
+    height: 68vmin;
+    max-width: 92vw;
+    max-height: 70vh;
+    border-radius: 0.7vmin;
+    background: linear-gradient(155deg, #272524 0%, #171615 48%, #0e0d0d 100%);
+    box-shadow:
+      0 3.2vmin 6.5vmin rgba(0, 0, 0, 0.92),
+      0 1vmin 2vmin rgba(0, 0, 0, 0.8),
+      inset 0 0.15vmin 0.25vmin rgba(255, 245, 230, 0.16),
+      inset 0 -0.2vmin 0.4vmin rgba(0, 0, 0, 0.95);
+  }
+
+  /* Pés e dobradiças discretos aparecendo nas bordas superior e inferior */
+  .hinge-left, .hinge-right {
+    position: absolute;
+    top: -0.7vmin;
+    width: 4.2vmin;
+    height: 0.8vmin;
+    background: linear-gradient(90deg, #111, #2e2c2b, #111);
+    border-radius: 0.3vmin 0.3vmin 0 0;
+    box-shadow: 0 -0.2vmin 0.5vmin rgba(0, 0, 0, 0.8);
+  }
+  .hinge-left { left: 14%; }
+  .hinge-right { right: 14%; }
+
+  /* Área do prato e disco de vinil */
+  .platter-area {
+    position: absolute;
+    top: 50%;
+    left: 38.5%;
+    width: 58.5vmin;
+    height: 58.5vmin;
+    margin-top: -29.25vmin;
+    margin-left: -29.25vmin;
+    border-radius: 50%;
+    box-shadow:
+      0 1.4vmin 2.8vmin rgba(0, 0, 0, 0.95),
+      0 0.2vmin 0.5vmin rgba(0, 0, 0, 0.9);
+  }
+
+  /* Camada isolada do vinil que gira continuamente */
+  .vinyl-rotor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-will-change: transform;
+    will-change: transform;
+    -webkit-animation: spinRecord 3.6s linear infinite;
+    animation: spinRecord 3.6s linear infinite;
+  }
+
+  @-webkit-keyframes spinRecord {
+    0% { -webkit-transform: translateZ(0) rotate(0deg); }
+    100% { -webkit-transform: translateZ(0) rotate(360deg); }
+  }
+
+  @keyframes spinRecord {
+    0% { transform: translateZ(0) rotate(0deg); }
+    100% { transform: translateZ(0) rotate(360deg); }
+  }
+
+  /* Reflexo realista em ampulheta (anisotrópico) fixo sobre o vinil */
+  .vinyl-specular {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* Pino central metálico estático */
+  .spindle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.6vmin;
+    height: 1.6vmin;
+    margin-top: -0.8vmin;
+    margin-left: -0.8vmin;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, #ffffff 0%, #b8b5b0 45%, #3a3836 85%, #141312 100%);
+    box-shadow: 0.25vmin 0.35vmin 0.6vmin rgba(0, 0, 0, 0.95);
+    pointer-events: none;
+  }
+
+  /* Camada superior de controles, braço e sombras projetadas */
+  .hardware-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* Painel de exibição da música em tom âmbar/creme quente */
+  .now-playing {
+    position: relative;
+    z-index: 2;
+    width: 82vmin;
+    max-width: 92vw;
+    margin-top: 2.8vmin;
+    padding: 1.5vmin 2.4vmin;
+    border-radius: 0.8vmin;
+    background: rgba(15, 11, 8, 0.82);
+    border: 0.12vmin solid rgba(235, 198, 152, 0.16);
+    box-shadow: 0 1.2vmin 3vmin rgba(0, 0, 0, 0.75);
+    text-align: center;
+  }
+
+  .song-title {
+    font-size: 3.2vmin;
+    font-weight: 600;
+    color: #f6ead9;
+    letter-spacing: 0.03em;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .song-details {
+    margin-top: 0.6vmin;
+    font-size: 2vmin;
+    color: #c8a882;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dot-sep {
+    margin: 0 0.85vmin;
+    color: #7d6246;
+  }
+
+  @media (orientation: portrait) {
+    .turntable-plinth {
+      width: 90vw;
+      height: 74.6vw;
+      max-height: none;
+    }
+    .platter-area {
+      width: 64.2vw;
+      height: 64.2vw;
+      margin-top: -32.1vw;
+      margin-left: -32.1vw;
+    }
+    .now-playing {
+      width: 90vw;
+      margin-top: 4.2vh;
+      padding: 2vh 3.5vw;
+    }
+    .song-title {
+      font-size: 3vh;
+    }
+    .song-details {
+      font-size: 1.9vh;
+      margin-top: 0.9vh;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <!-- Textura realista de mesa de madeira escura (nogueira) estática -->
+  <div class="wood-table-bg">
+    <svg width="100%" height="100%" preserveAspectRatio="none">
+      <defs>
+        <filter id="walnutGrain" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006 0.09" numOctaves="4" seed="14" result="baseNoise"/>
+          <feColorMatrix type="matrix" values="
+            0.34 0    0    0 0.14
+            0.18 0    0    0 0.07
+            0.09 0    0    0 0.03
+            0    0    0    0.75 0" in="baseNoise" result="woodColor"/>
+        </filter>
+        <radialGradient id="tableSpotlight" cx="52%" cy="46%" r="65%">
+          <stop offset="0%" stop-color="#4d311d" stop-opacity="0.55"/>
+          <stop offset="55%" stop-color="#29180d" stop-opacity="0.72"/>
+          <stop offset="100%" stop-color="#0d0704" stop-opacity="0.95"/>
+        </radialGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="#2b190e"/>
+      <rect width="100%" height="100%" filter="url(#walnutGrain)"/>
+      <!-- Tábuas sutis da mesa -->
+      <line x1="0" y1="22%" x2="100%" y2="22%" stroke="#120904" stroke-width="2" opacity="0.55"/>
+      <line x1="0" y1="51%" x2="100%" y2="51%" stroke="#120904" stroke-width="2.5" opacity="0.6"/>
+      <line x1="0" y1="79%" x2="100%" y2="79%" stroke="#120904" stroke-width="2" opacity="0.55"/>
+      <rect width="100%" height="100%" fill="url(#tableSpotlight)"/>
+    </svg>
+  </div>
+
+  <!-- Corpo preto fosco da vitrola -->
+  <div class="turntable-plinth">
+    <div class="hinge-left"></div>
+    <div class="hinge-right"></div>
+
+    <!-- Prato e Disco -->
+    <div class="platter-area">
+      <!-- Camada que gira -->
+      <div class="vinyl-rotor">
+        <svg width="100%" height="100%" viewBox="0 0 600 600" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <!-- Borda externa chanfrada do disco -->
+          <circle cx="300" cy="300" r="298" fill="#161616" stroke="#363534" stroke-width="2.5"/>
+          <circle cx="300" cy="300" r="293" fill="#0d0d0d" stroke="#242322" stroke-width="1.5"/>
+
+          <!-- Sulcos microscópicos e faixas separadoras realistas -->
+          <circle cx="300" cy="300" r="283" fill="none" stroke="#1b1b1b" stroke-width="1.2"/>
+          <circle cx="300" cy="300" r="275" fill="none" stroke="#151515" stroke-width="1"/>
+          <circle cx="300" cy="300" r="267" fill="none" stroke="#1d1d1d" stroke-width="1.1"/>
+          <circle cx="300" cy="300" r="259" fill="none" stroke="#141414" stroke-width="1"/>
+          <circle cx="300" cy="300" r="251" fill="none" stroke="#1b1b1b" stroke-width="1.1"/>
+          <!-- Faixa lisa entre músicas -->
+          <circle cx="300" cy="300" r="242" fill="none" stroke="#262626" stroke-width="3"/>
+
+          <circle cx="300" cy="300" r="232" fill="none" stroke="#1a1a1a" stroke-width="1.1"/>
+          <circle cx="300" cy="300" r="224" fill="none" stroke="#141414" stroke-width="1"/>
+          <circle cx="300" cy="300" r="216" fill="none" stroke="#1c1c1c" stroke-width="1.1"/>
+          <circle cx="300" cy="300" r="208" fill="none" stroke="#151515" stroke-width="1"/>
+          <!-- Faixa lisa entre músicas -->
+          <circle cx="300" cy="300" r="198" fill="none" stroke="#262626" stroke-width="3"/>
+
+          <circle cx="300" cy="300" r="188" fill="none" stroke="#1b1b1b" stroke-width="1.1"/>
+          <circle cx="300" cy="300" r="180" fill="none" stroke="#141414" stroke-width="1"/>
+          <circle cx="300" cy="300" r="172" fill="none" stroke="#1c1c1c" stroke-width="1.1"/>
+          <circle cx="300" cy="300" r="164" fill="none" stroke="#151515" stroke-width="1"/>
+          <!-- Faixa lisa entre músicas -->
+          <circle cx="300" cy="300" r="154" fill="none" stroke="#262626" stroke-width="2.8"/>
+
+          <circle cx="300" cy="300" r="144" fill="none" stroke="#1a1a1a" stroke-width="1.1"/>
+          <circle cx="300" cy="300" r="136" fill="none" stroke="#151515" stroke-width="1"/>
+          <!-- Área interna lisa antes do selo (run-out) -->
+          <circle cx="300" cy="300" r="121" fill="none" stroke="#1f1f1f" stroke-width="12"/>
+          <circle cx="300" cy="300" r="112" fill="none" stroke="#121212" stroke-width="1.5"/>
+
+          <!-- Rótulo vintage preto e creme idêntico ao estilo da foto -->
+          <circle cx="300" cy="300" r="102" fill="#141414" stroke="#2e2d2b" stroke-width="1.5"/>
+          <circle cx="300" cy="300" r="95" fill="none" stroke="#e8e2d5" stroke-width="1.5"/>
+          <circle cx="300" cy="300" r="56" fill="#ede7da"/>
+          <circle cx="300" cy="300" r="32" fill="#141414"/>
+
+          <!-- Tipografia curvada e marcas do selo que giram com o disco -->
+          <defs>
+            <path id="topArc" d="M 226,300 A 74,74 0 1,1 374,300"/>
+            <path id="botArc" d="M 376,300 A 76,76 0 1,1 224,300"/>
+          </defs>
+          <text font-size="15" font-weight="800" fill="#f0eadc" letter-spacing="3.2">
+            <textPath xlink:href="#topArc" startOffset="50%" text-anchor="middle">VINTAGE VINYL</textPath>
+          </text>
+          <text font-size="8.5" font-weight="700" fill="#b8b0a0" letter-spacing="2">
+            <textPath xlink:href="#botArc" startOffset="50%" text-anchor="middle">LONG PLAYING • 33⅓ RPM</textPath>
+          </text>
+
+          <!-- Detalhes gráficos internos do rótulo -->
+          <text x="256" y="303" font-size="7.5" font-weight="800" fill="#141414" text-anchor="middle">SIDE</text>
+          <text x="344" y="303" font-size="7.5" font-weight="800" fill="#141414" text-anchor="middle">ONE</text>
+          <circle cx="300" cy="256" r="3" fill="#141414"/>
+          <circle cx="300" cy="344" r="3" fill="#141414"/>
+
+          <!-- Furo central -->
+          <circle cx="300" cy="300" r="10" fill="#090909"/>
+        </svg>
+      </div>
+
+      <!-- Brilho especular anisotrópico estático (cones de luz reais no vinil) -->
+      <div class="vinyl-specular">
+        <svg width="100%" height="100%" viewBox="0 0 600 600">
+          <defs>
+            <linearGradient id="coneLight1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+              <stop offset="55%" stop-color="#f7ead8" stop-opacity="0.09"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="coneLight2" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+              <stop offset="55%" stop-color="#f7ead8" stop-opacity="0.07"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+            <mask id="vinylRingMask">
+              <rect width="600" height="600" fill="black"/>
+              <circle cx="300" cy="300" r="296" fill="white"/>
+              <circle cx="300" cy="300" r="103" fill="black"/>
+            </mask>
+          </defs>
+          <g mask="url(#vinylRingMask)">
+            <!-- Feixe superior esquerdo -->
+            <polygon points="300,300 40,120 190,15" fill="url(#coneLight1)"/>
+            <polygon points="300,300 85,85 135,45" fill="#ffffff" opacity="0.08"/>
+            <!-- Feixe inferior direito -->
+            <polygon points="300,300 560,480 410,585" fill="url(#coneLight2)"/>
+            <polygon points="300,300 515,515 465,555" fill="#ffffff" opacity="0.06"/>
+          </g>
+          <!-- Borda externa com reflexo sutil -->
+          <circle cx="300" cy="300" r="297.5" fill="none" stroke="rgba(255,245,230,0.14)" stroke-width="1.2"/>
+        </svg>
+      </div>
+
+      <!-- Pino central metálico fixo -->
+      <div class="spindle"></div>
+    </div>
+
+    <!-- Braço cromado realista, contrapeso e 3 knobs inferiores -->
+    <div class="hardware-overlay">
+      <svg width="100%" height="100%" viewBox="0 0 820 680" preserveAspectRatio="none">
+        <defs>
+          <!-- Gradientes metálicos cromados realistas -->
+          <linearGradient id="chromeCyl" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#4e4b47"/>
+            <stop offset="22%" stop-color="#dedad2"/>
+            <stop offset="45%" stop-color="#ffffff"/>
+            <stop offset="72%" stop-color="#8b867e"/>
+            <stop offset="100%" stop-color="#2b2927"/>
+          </linearGradient>
+
+          <linearGradient id="chromeArm" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f7f4ee"/>
+            <stop offset="30%" stop-color="#b5b0a8"/>
+            <stop offset="60%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#5e5a54"/>
+          </linearGradient>
+
+          <radialGradient id="knobTop" cx="38%" cy="32%" r="68%">
+            <stop offset="0%" stop-color="#474442"/>
+            <stop offset="55%" stop-color="#1f1e1d"/>
+            <stop offset="100%" stop-color="#0c0b0b"/>
+          </radialGradient>
+
+          <radialGradient id="gimbalRing" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="40%" stop-color="#b8b3aa"/>
+            <stop offset="85%" stop-color="#4a4742"/>
+            <stop offset="100%" stop-color="#211f1d"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Sombra realista projetada do braço sobre o chassi e sobre o disco -->
+        <g transform="translate(-14, 22)" opacity="0.68">
+          <circle cx="672" cy="176" r="46" fill="#000000"/>
+          <path d="M 730,86 L 672,176 L 615,272 L 598,378 L 518,452" fill="none" stroke="#000000" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+          <polygon points="528,434 544,450 492,502 476,486" fill="#000000"/>
+        </g>
+
+        <!-- Base escura circular do conjunto do braço -->
+        <circle cx="672" cy="176" r="54" fill="#100f0f" stroke="#292725" stroke-width="1.5"/>
+        <circle cx="672" cy="176" r="45" fill="#181716"/>
+
+        <!-- Haste de descanso do braço (arm rest) à direita -->
+        <path d="M 712,202 L 738,202" stroke="#2d2b29" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="738" cy="202" r="6" fill="#121111" stroke="#4a4743" stroke-width="1.5"/>
+
+        <!-- Alavanca cueing lever -->
+        <path d="M 622,196 L 605,212" stroke="#9e9991" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="604" cy="213" r="3.5" fill="#d9d4cc"/>
+
+        <!-- Eixo traseiro e Contrapeso cilíndrico cromado (inclinado ~32 graus como na foto) -->
+        <g transform="translate(672, 176) rotate(32)">
+          <!-- Haste traseira -->
+          <rect x="-6" y="-108" width="12" height="68" fill="url(#chromeCyl)"/>
+          <!-- Anel de escala graduada -->
+          <rect x="-19" y="-66" width="38" height="10" rx="2" fill="#1c1b1a" stroke="#7d7870" stroke-width="1"/>
+          <!-- Corpo principal do contrapeso -->
+          <rect x="-22" y="-102" width="44" height="36" rx="4" fill="url(#chromeCyl)" stroke="#2b2927" stroke-width="1.5"/>
+          <line x1="-22" y1="-94" x2="22" y2="-94" stroke="#363330" stroke-width="1.2"/>
+          <line x1="-22" y1="-74" x2="22" y2="-74" stroke="#363330" stroke-width="1.2"/>
+          <!-- Ponta traseira do eixo -->
+          <rect x="-8" y="-113" width="16" height="6" rx="2" fill="url(#chromeCyl)"/>
+
+          <!-- Anel externo do Gimbal cromado -->
+          <circle cx="0" cy="0" r="32" fill="none" stroke="url(#gimbalRing)" stroke-width="7"/>
+          <circle cx="0" cy="0" r="24" fill="#161514" stroke="#5e5a54" stroke-width="1.5"/>
+          <!-- Pivôs laterais do Gimbal -->
+          <rect x="-36" y="-5" width="7" height="10" rx="1.5" fill="url(#chromeCyl)"/>
+          <rect x="29" y="-5" width="7" height="10" rx="1.5" fill="url(#chromeCyl)"/>
+          <!-- Ponte superior do Gimbal -->
+          <rect x="-6" y="-26" width="12" height="52" rx="3" fill="url(#chromeCyl)" stroke="#383532" stroke-width="1"/>
+          <circle cx="0" cy="0" r="6" fill="url(#gimbalRing)"/>
+        </g>
+
+        <!-- Tubo em S cromado do braço -->
+        <path d="M 654,205 L 614,270 C 602,290 604,352 592,374 L 526,440"
+              fill="none" stroke="url(#chromeArm)" stroke-width="10.5" stroke-linecap="round"/>
+        <!-- Filete especular de brilho no tubo -->
+        <path d="M 653,205 L 613,270 C 601,290 603,352 591,374 L 525,440"
+              fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity="0.8"/>
+
+        <!-- Colar de travamento do headshell -->
+        <g transform="translate(528, 438) rotate(45)">
+          <rect x="-7" y="-6" width="14" height="12" rx="1.5" fill="url(#chromeCyl)" stroke="#2b2927" stroke-width="1"/>
+        </g>
+
+        <!-- Headshell metálico estilo vintage vazado e agulha apoiada no vinil -->
+        <g transform="translate(502, 464) rotate(45)">
+          <!-- Corpo principal do headshell -->
+          <rect x="-12" y="-30" width="24" height="58" rx="3" fill="url(#chromeCyl)" stroke="#33302d" stroke-width="1.2"/>
+          <!-- Recortes escuros característicos do headshell -->
+          <rect x="-7" y="-20" width="14" height="10" rx="1.5" fill="#1a1918"/>
+          <rect x="-7" y="-4" width="14" height="14" rx="1.5" fill="#1a1918"/>
+          <!-- Parafusos de fixação da cápsula -->
+          <circle cx="-5" cy="17" r="2.2" fill="#e8e4dc" stroke="#222" stroke-width="0.8"/>
+          <circle cx="5" cy="17" r="2.2" fill="#e8e4dc" stroke="#222" stroke-width="0.8"/>
+          <!-- Alça lateral (finger lift) -->
+          <path d="M 12,-14 L 25,-22 L 27,-19 L 12,-9 Z" fill="url(#chromeArm)"/>
+          <!-- Ponta da agulha tocando o sulco -->
+          <polygon points="-2,28 2,28 0,38" fill="#e6dfd3"/>
+        </g>
+
+        <!-- 3 Botões giratórios inferiores direitos (Volume / Tone / Power) -->
+        <!-- Knob 1 -->
+        <g transform="translate(556, 608)">
+          <circle cx="-3" cy="5" r="21" fill="rgba(0,0,0,0.75)"/>
+          <circle cx="0" cy="0" r="20" fill="url(#knobTop)" stroke="#4f4b47" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="15" fill="none" stroke="#2e2c2a" stroke-width="1"/>
+          <line x1="0" y1="-18" x2="0" y2="-8" stroke="#e8dfd1" stroke-width="2" stroke-linecap="round"/>
+          <text x="0" y="34" font-size="8" font-weight="600" fill="#8c8378" text-anchor="middle" letter-spacing="1">POWER</text>
+        </g>
+
+        <!-- Knob 2 -->
+        <g transform="translate(642, 608)">
+          <circle cx="-3" cy="5" r="21" fill="rgba(0,0,0,0.75)"/>
+          <circle cx="0" cy="0" r="20" fill="url(#knobTop)" stroke="#4f4b47" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="15" fill="none" stroke="#2e2c2a" stroke-width="1"/>
+          <line x1="7" y1="-16" x2="3" y2="-7" stroke="#e8dfd1" stroke-width="2" stroke-linecap="round"/>
+          <text x="0" y="34" font-size="8" font-weight="600" fill="#8c8378" text-anchor="middle" letter-spacing="1">TONE</text>
+        </g>
+
+        <!-- Knob 3 -->
+        <g transform="translate(728, 608)">
+          <circle cx="-3" cy="5" r="21" fill="rgba(0,0,0,0.75)"/>
+          <circle cx="0" cy="0" r="20" fill="url(#knobTop)" stroke="#4f4b47" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="15" fill="none" stroke="#2e2c2a" stroke-width="1"/>
+          <line x1="12" y1="-13" x2="5" y2="-6" stroke="#e8dfd1" stroke-width="2" stroke-linecap="round"/>
+          <text x="0" y="34" font-size="8" font-weight="600" fill="#8c8378" text-anchor="middle" letter-spacing="1">VOLUME</text>
+        </g>
+
+        <!-- Mini chave seletora entre os knobs -->
+        <circle cx="599" cy="608" r="4.5" fill="#0d0c0c" stroke="#45423e" stroke-width="1.2"/>
+        <circle cx="599" cy="608" r="2" fill="#b8b2a8"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Exibição das informações da música -->
+  <div class="now-playing">
+    <div id="a" class="song-title">Sem dados</div>
+    <div class="song-details"><span id="r"></span><span id="sep" class="dot-sep"></span><span id="b"></span></div>
+  </div>
 </div>
+
 <script>
-(function(){
-var h=location.hash.replace(/^#/,''),p=h.split('~');
-function d(x){try{return decodeURIComponent((x||'').replace(/\+/g,' '))}catch(e){return x||''}}
-if(h){
-document.getElementById('a').textContent=d(p[0]);
-document.getElementById('b').textContent=d(p[1]);
-document.getElementById('r').textContent=d(p[2]);
-}
-document.addEventListener('touchmove',function(e){e.preventDefault()},false);
-})();
-</script></body></html>
+  (function(){
+    var h = location.hash.replace(/^#/, ''), p = h.split('~');
+    function d(x){
+      try { return decodeURIComponent((x || '').replace(/\+/g, ' ')); }
+      catch (e) { return x || ''; }
+    }
+    if (h) {
+      var titulo = d(p[0]);
+      var album = d(p[1]);
+      var artista = d(p[2]);
+      document.getElementById('a').textContent = titulo || 'Sem dados';
+      document.getElementById('b').textContent = album;
+      document.getElementById('r').textContent = artista;
+      document.getElementById('sep').textContent = (artista && album) ? '•' : '';
+    }
+    document.addEventListener('touchmove', function(e){ e.preventDefault(); }, false);
+  })();
+</script>
+</body>
+</html>
